@@ -1,0 +1,62 @@
+/* Dataset Information and Location */
+/* The dataset 'eRepublicData' is stored locally within the SAS environment.
+   It consists of bid information for various IT products required by eRepublic.
+   Variables include BidID (identification for each bid), Budget (allocated budget for the bid),
+   ContactName (contact person for the bid), ProductType (type of IT product), QtyRequired (quantity of product required),
+   and BidDate (date when the bid was placed).
+   This data is used for analyzing budget allocations, product demand, and purchasing trends over time. */
+
+/* Creating a Dataset with 20 Bids */
+data eRepublicData;
+    format BidID $10. Budget dollar15.2 ContactName $20. ProductType $15. QtyRequired 8. BidDate mmddyy10.;
+    input BidID $ Budget ContactName $ ProductType $ QtyRequired BidDate :mmddyy10.;
+    datalines;
+    BID001 200000 JohnDoe Desktops 50 01/15/2024
+    BID002 150000 JaneSmith Laptops 30 02/20/2024
+    BID003 50000 MikeBrown Printers 20 03/05/2024
+    BID004 75000 SarahLee Projectors 10 04/10/2024
+    BID005 300000 AlexYu Servers 5 05/25/2024
+    BID006 120000 LucyChen Tablets 25 06/15/2024
+    BID007 80000 MarkTay Monitors 15 07/20/2024
+    BID008 100000 AnnaKuo Routers 10 08/05/2024
+    BID009 220000 SamLau Switches 8 09/10/2024
+    BID010 90000 KarenYip Cameras 12 10/25/2024
+    BID011 110000 DaveLee Desktops 40 11/15/2024
+    BID012 160000 SusanHo Laptops 35 12/20/2024
+    BID013 565852 JennieChu Software 80 05/15/2024
+    BID014 215688 ArmandoLopez Drones 15 05/11/2024
+    BID015 156852 KathyThomas iPhones 22 06/05/2024
+    BID016 185688 MichelleGolden iMacs 8 11/12/2024
+    BID017 554545 TaylorBruce AppleCare 150 10/01/2024
+    BID018 001255 DwayneJohnson Microphones 23 07/11/2024
+    BID019 121800 JoMarquez Speakers 35 03/31/2024
+    BID020 745855 ShakiraStone Mouse 44 11/17/2024
+   ;
+run;
+
+/* Analyzing Budget and Quantity */
+proc means data=eRepublicData;
+    var Budget QtyRequired;
+run;
+/* Filtering and Sorting for Desktop Purchases */
+proc sql;
+    select * from eRepublicData
+    where ProductType = "Desktops"
+    order by Budget desc;
+quit;
+/* Total Budget by Product Type */
+proc sql;
+    select ProductType, sum(Budget) as TotalBudget
+    from eRepublicData
+    group by ProductType;
+quit;
+/* Bar Chart of Budget by Product Type */
+proc sgplot data=eRepublicData;
+    vbar ProductType / response=Budget stat=sum;
+    xaxis label="Product Type";
+    yaxis label="Total Budget";
+run;
+/* Trend Over Time */
+proc timeseries data=eRepublicData out=trend;
+    id BidDate interval=month;
+    var Budget;
